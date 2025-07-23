@@ -37,15 +37,10 @@ void btStridingMeshInterface::InternalProcessAllTriangles(btInternalTriangleInde
 
 	btVector3 meshScaling = getScaling();
 
-	///if the number of parts is big, the performance might drop due to the innerloop switch on indextype
 	for (part = 0; part < graphicssubparts; part++)
 	{
 		getLockedReadOnlyVertexIndexBase(&vertexbase, numverts, type, stride, &indexbase, indexstride, numtriangles, gfxindextype, part);
-		numtotalphysicsverts += numtriangles * 3;  //upper bound
-
-		///unlike that developers want to pass in double-precision meshes in single-precision Bullet build
-		///so disable this feature by default
-		///see patch http://code.google.com/p/bullet/issues/detail?id=213
+		numtotalphysicsverts += numtriangles * 3;
 
 		switch (type)
 		{
@@ -60,12 +55,18 @@ void btStridingMeshInterface::InternalProcessAllTriangles(btInternalTriangleInde
 						for (gfxindex = 0; gfxindex < numtriangles; gfxindex++)
 						{
 							unsigned int* tri_indices = (unsigned int*)(indexbase + gfxindex * indexstride);
-							graphicsbase = (float*)(vertexbase + tri_indices[0] * stride);
+							size_t offset0 = static_cast<size_t>(tri_indices[0]) * static_cast<size_t>(stride);
+							graphicsbase = reinterpret_cast<float*>(const_cast<unsigned char*>(vertexbase + offset0));
 							triangle[0].setValue(graphicsbase[0] * meshScaling.getX(), graphicsbase[1] * meshScaling.getY(), graphicsbase[2] * meshScaling.getZ());
-							graphicsbase = (float*)(vertexbase + tri_indices[1] * stride);
+
+							size_t offset1 = static_cast<size_t>(tri_indices[1]) * static_cast<size_t>(stride);
+							graphicsbase = reinterpret_cast<float*>(const_cast<unsigned char*>(vertexbase + offset1));
 							triangle[1].setValue(graphicsbase[0] * meshScaling.getX(), graphicsbase[1] * meshScaling.getY(), graphicsbase[2] * meshScaling.getZ());
-							graphicsbase = (float*)(vertexbase + tri_indices[2] * stride);
+
+							size_t offset2 = static_cast<size_t>(tri_indices[2]) * static_cast<size_t>(stride);
+							graphicsbase = reinterpret_cast<float*>(const_cast<unsigned char*>(vertexbase + offset2));
 							triangle[2].setValue(graphicsbase[0] * meshScaling.getX(), graphicsbase[1] * meshScaling.getY(), graphicsbase[2] * meshScaling.getZ());
+
 							callback->internalProcessTriangleIndex(triangle, part, gfxindex);
 						}
 						break;
@@ -75,12 +76,18 @@ void btStridingMeshInterface::InternalProcessAllTriangles(btInternalTriangleInde
 						for (gfxindex = 0; gfxindex < numtriangles; gfxindex++)
 						{
 							unsigned short int* tri_indices = (unsigned short int*)(indexbase + gfxindex * indexstride);
-							graphicsbase = (float*)(vertexbase + tri_indices[0] * stride);
+							size_t offset0 = static_cast<size_t>(tri_indices[0]) * static_cast<size_t>(stride);
+							graphicsbase = reinterpret_cast<float*>(const_cast<unsigned char*>(vertexbase + offset0));
 							triangle[0].setValue(graphicsbase[0] * meshScaling.getX(), graphicsbase[1] * meshScaling.getY(), graphicsbase[2] * meshScaling.getZ());
-							graphicsbase = (float*)(vertexbase + tri_indices[1] * stride);
+
+							size_t offset1 = static_cast<size_t>(tri_indices[1]) * static_cast<size_t>(stride);
+							graphicsbase = reinterpret_cast<float*>(const_cast<unsigned char*>(vertexbase + offset1));
 							triangle[1].setValue(graphicsbase[0] * meshScaling.getX(), graphicsbase[1] * meshScaling.getY(), graphicsbase[2] * meshScaling.getZ());
-							graphicsbase = (float*)(vertexbase + tri_indices[2] * stride);
+
+							size_t offset2 = static_cast<size_t>(tri_indices[2]) * static_cast<size_t>(stride);
+							graphicsbase = reinterpret_cast<float*>(const_cast<unsigned char*>(vertexbase + offset2));
 							triangle[2].setValue(graphicsbase[0] * meshScaling.getX(), graphicsbase[1] * meshScaling.getY(), graphicsbase[2] * meshScaling.getZ());
+
 							callback->internalProcessTriangleIndex(triangle, part, gfxindex);
 						}
 						break;
@@ -90,12 +97,18 @@ void btStridingMeshInterface::InternalProcessAllTriangles(btInternalTriangleInde
 						for (gfxindex = 0; gfxindex < numtriangles; gfxindex++)
 						{
 							unsigned char* tri_indices = (unsigned char*)(indexbase + gfxindex * indexstride);
-							graphicsbase = (float*)(vertexbase + tri_indices[0] * stride);
+							size_t offset0 = static_cast<size_t>(tri_indices[0]) * static_cast<size_t>(stride);
+							graphicsbase = reinterpret_cast<float*>(const_cast<unsigned char*>(vertexbase + offset0));
 							triangle[0].setValue(graphicsbase[0] * meshScaling.getX(), graphicsbase[1] * meshScaling.getY(), graphicsbase[2] * meshScaling.getZ());
-							graphicsbase = (float*)(vertexbase + tri_indices[1] * stride);
+
+							size_t offset1 = static_cast<size_t>(tri_indices[1]) * static_cast<size_t>(stride);
+							graphicsbase = reinterpret_cast<float*>(const_cast<unsigned char*>(vertexbase + offset1));
 							triangle[1].setValue(graphicsbase[0] * meshScaling.getX(), graphicsbase[1] * meshScaling.getY(), graphicsbase[2] * meshScaling.getZ());
-							graphicsbase = (float*)(vertexbase + tri_indices[2] * stride);
+
+							size_t offset2 = static_cast<size_t>(tri_indices[2]) * static_cast<size_t>(stride);
+							graphicsbase = reinterpret_cast<float*>(const_cast<unsigned char*>(vertexbase + offset2));
 							triangle[2].setValue(graphicsbase[0] * meshScaling.getX(), graphicsbase[1] * meshScaling.getY(), graphicsbase[2] * meshScaling.getZ());
+
 							callback->internalProcessTriangleIndex(triangle, part, gfxindex);
 						}
 						break;
@@ -117,12 +130,18 @@ void btStridingMeshInterface::InternalProcessAllTriangles(btInternalTriangleInde
 						for (gfxindex = 0; gfxindex < numtriangles; gfxindex++)
 						{
 							unsigned int* tri_indices = (unsigned int*)(indexbase + gfxindex * indexstride);
-							graphicsbase = (double*)(vertexbase + tri_indices[0] * stride);
+							size_t offset0 = static_cast<size_t>(tri_indices[0]) * static_cast<size_t>(stride);
+							graphicsbase = reinterpret_cast<double*>(const_cast<unsigned char*>(vertexbase + offset0));
 							triangle[0].setValue((btScalar)graphicsbase[0] * meshScaling.getX(), (btScalar)graphicsbase[1] * meshScaling.getY(), (btScalar)graphicsbase[2] * meshScaling.getZ());
-							graphicsbase = (double*)(vertexbase + tri_indices[1] * stride);
+
+							size_t offset1 = static_cast<size_t>(tri_indices[1]) * static_cast<size_t>(stride);
+							graphicsbase = reinterpret_cast<double*>(const_cast<unsigned char*>(vertexbase + offset1));
 							triangle[1].setValue((btScalar)graphicsbase[0] * meshScaling.getX(), (btScalar)graphicsbase[1] * meshScaling.getY(), (btScalar)graphicsbase[2] * meshScaling.getZ());
-							graphicsbase = (double*)(vertexbase + tri_indices[2] * stride);
+
+							size_t offset2 = static_cast<size_t>(tri_indices[2]) * static_cast<size_t>(stride);
+							graphicsbase = reinterpret_cast<double*>(const_cast<unsigned char*>(vertexbase + offset2));
 							triangle[2].setValue((btScalar)graphicsbase[0] * meshScaling.getX(), (btScalar)graphicsbase[1] * meshScaling.getY(), (btScalar)graphicsbase[2] * meshScaling.getZ());
+
 							callback->internalProcessTriangleIndex(triangle, part, gfxindex);
 						}
 						break;
@@ -132,12 +151,18 @@ void btStridingMeshInterface::InternalProcessAllTriangles(btInternalTriangleInde
 						for (gfxindex = 0; gfxindex < numtriangles; gfxindex++)
 						{
 							unsigned short int* tri_indices = (unsigned short int*)(indexbase + gfxindex * indexstride);
-							graphicsbase = (double*)(vertexbase + tri_indices[0] * stride);
+							size_t offset0 = static_cast<size_t>(tri_indices[0]) * static_cast<size_t>(stride);
+							graphicsbase = reinterpret_cast<double*>(const_cast<unsigned char*>(vertexbase + offset0));
 							triangle[0].setValue((btScalar)graphicsbase[0] * meshScaling.getX(), (btScalar)graphicsbase[1] * meshScaling.getY(), (btScalar)graphicsbase[2] * meshScaling.getZ());
-							graphicsbase = (double*)(vertexbase + tri_indices[1] * stride);
+
+							size_t offset1 = static_cast<size_t>(tri_indices[1]) * static_cast<size_t>(stride);
+							graphicsbase = reinterpret_cast<double*>(const_cast<unsigned char*>(vertexbase + offset1));
 							triangle[1].setValue((btScalar)graphicsbase[0] * meshScaling.getX(), (btScalar)graphicsbase[1] * meshScaling.getY(), (btScalar)graphicsbase[2] * meshScaling.getZ());
-							graphicsbase = (double*)(vertexbase + tri_indices[2] * stride);
+
+							size_t offset2 = static_cast<size_t>(tri_indices[2]) * static_cast<size_t>(stride);
+							graphicsbase = reinterpret_cast<double*>(const_cast<unsigned char*>(vertexbase + offset2));
 							triangle[2].setValue((btScalar)graphicsbase[0] * meshScaling.getX(), (btScalar)graphicsbase[1] * meshScaling.getY(), (btScalar)graphicsbase[2] * meshScaling.getZ());
+
 							callback->internalProcessTriangleIndex(triangle, part, gfxindex);
 						}
 						break;
@@ -147,12 +172,18 @@ void btStridingMeshInterface::InternalProcessAllTriangles(btInternalTriangleInde
 						for (gfxindex = 0; gfxindex < numtriangles; gfxindex++)
 						{
 							unsigned char* tri_indices = (unsigned char*)(indexbase + gfxindex * indexstride);
-							graphicsbase = (double*)(vertexbase + tri_indices[0] * stride);
+							size_t offset0 = static_cast<size_t>(tri_indices[0]) * static_cast<size_t>(stride);
+							graphicsbase = reinterpret_cast<double*>(const_cast<unsigned char*>(vertexbase + offset0));
 							triangle[0].setValue((btScalar)graphicsbase[0] * meshScaling.getX(), (btScalar)graphicsbase[1] * meshScaling.getY(), (btScalar)graphicsbase[2] * meshScaling.getZ());
-							graphicsbase = (double*)(vertexbase + tri_indices[1] * stride);
+
+							size_t offset1 = static_cast<size_t>(tri_indices[1]) * static_cast<size_t>(stride);
+							graphicsbase = reinterpret_cast<double*>(const_cast<unsigned char*>(vertexbase + offset1));
 							triangle[1].setValue((btScalar)graphicsbase[0] * meshScaling.getX(), (btScalar)graphicsbase[1] * meshScaling.getY(), (btScalar)graphicsbase[2] * meshScaling.getZ());
-							graphicsbase = (double*)(vertexbase + tri_indices[2] * stride);
+
+							size_t offset2 = static_cast<size_t>(tri_indices[2]) * static_cast<size_t>(stride);
+							graphicsbase = reinterpret_cast<double*>(const_cast<unsigned char*>(vertexbase + offset2));
 							triangle[2].setValue((btScalar)graphicsbase[0] * meshScaling.getX(), (btScalar)graphicsbase[1] * meshScaling.getY(), (btScalar)graphicsbase[2] * meshScaling.getZ());
+
 							callback->internalProcessTriangleIndex(triangle, part, gfxindex);
 						}
 						break;
@@ -169,6 +200,7 @@ void btStridingMeshInterface::InternalProcessAllTriangles(btInternalTriangleInde
 		unLockReadOnlyVertexBase(part);
 	}
 }
+
 
 void btStridingMeshInterface::calculateAabbBruteForce(btVector3& aabbMin, btVector3& aabbMax)
 {
