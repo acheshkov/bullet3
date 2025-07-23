@@ -115,64 +115,63 @@ public:
 		}
 	}
 
-	void processDecomposition(int part)
+void processDecomposition(int part)
+{
+	btGImpactMeshShapePart::TrimeshPrimitiveManager* trimeshInterface =
+		m_compoundShape->getTrimeshInterface(part);
+
+	trimeshInterface->lock();
+
+	//collect vertices
+	btAlignedObjectArray<float> vertices;
+	vertices.reserve(trimeshInterface->get_vertex_count() * 3);
+
+	for (int vi = 0; vi < trimeshInterface->get_vertex_count(); vi++)
 	{
-		btGImpactMeshShapePart::TrimeshPrimitiveManager* trimeshInterface =
-			m_compoundShape->getTrimeshInterface(part);
-
-		trimeshInterface->lock();
-
-		//collect vertices
-		btAlignedObjectArray<float> vertices;
-		vertices.reserve(trimeshInterface->get_vertex_count() * 3);
-
-		for (int vi = 0; vi < trimeshInterface->get_vertex_count(); vi++)
-		{
-			btVector3 vec;
-			trimeshInterface->get_vertex(vi, vec);
-			vertices.push_back(vec[0]);
-			vertices.push_back(vec[1]);
-			vertices.push_back(vec[2]);
-		}
-
-		//collect indices
-		btAlignedObjectArray<unsigned int> indices;
-		indices.reserve(trimeshInterface->get_primitive_count() * 3);
-
-		for (int i = 0; i < trimeshInterface->get_primitive_count(); i++)
-		{
-			unsigned int i0, i1, i2;
-			trimeshInterface->get_indices(i, i0, i1, i2);
-			indices.push_back(i0);
-			indices.push_back(i1);
-			indices.push_back(i2);
-		}
-
-		trimeshInterface->unlock();
-
-		unsigned int depth = 5;
-		float cpercent = 5;
-		float ppercent = 15;
-		unsigned int maxv = 16;
-		float skinWidth = 0.0f;
-
-		ConvexDecomposition::DecompDesc desc;
-		desc.mVcount = trimeshInterface->get_vertex_count();
-		desc.mVertices = &vertices[0];
-		desc.mTcount = trimeshInterface->get_primitive_count();
-		desc.mIndices = &indices[0];
-		desc.mDepth = depth;
-		desc.mCpercent = cpercent;
-		desc.mPpercent = ppercent;
-		desc.mMaxVertices = maxv;
-		desc.mSkinWidth = skinWidth;
-		desc.mCallback = this;
-
-		//convexDecomposition.performConvexDecomposition(desc);
-
-		ConvexBuilder cb(desc.mCallback);
-		cb.process(desc);
+		btVector3 vec;
+		trimeshInterface->get_vertex(vi, vec);
+		vertices.push_back(vec[0]);
+		vertices.push_back(vec[1]);
+		vertices.push_back(vec[2]);
 	}
+
+	//collect indices
+	btAlignedObjectArray<unsigned int> indices;
+	indices.reserve(trimeshInterface->get_primitive_count() * 3);
+
+	for (int i = 0; i < trimeshInterface->get_primitive_count(); i++)
+	{
+		unsigned int i0, i1, i2;
+		trimeshInterface->get_indices(i, i0, i1, i2);
+		indices.push_back(i0);
+		indices.push_back(i1);
+		indices.push_back(i2);
+	}
+
+	trimeshInterface->unlock();
+
+	unsigned int depth = 5;
+	float cpercent = 5;
+	float ppercent = 15;
+	unsigned int maxv = 16;
+	float skinWidth = 0.0f;
+
+	ConvexDecomposition::DecompDesc desc;
+	desc.mVcount = trimeshInterface->get_vertex_count();
+	desc.mVertices = &vertices[0];
+	desc.mTcount = static_cast<unsigned int>(trimeshInterface->get_primitive_count());
+	desc.mIndices = &indices[0];
+	desc.mDepth = depth;
+	desc.mCpercent = cpercent;
+	desc.mPpercent = ppercent;
+	desc.mMaxVertices = maxv;
+	desc.mSkinWidth = skinWidth;
+	desc.mCallback = this;
+
+	ConvexBuilder cb(desc.mCallback);
+	cb.process(desc);
+}
+
 };
 
 void btGImpactConvexDecompositionShape::buildConvexDecomposition(bool transformSubShapes)
